@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import AppInfo from "../app-info/app-info";
 import SearchPanel from "../app-search/app-search";
@@ -10,7 +10,14 @@ import "./app.css";
 
 const App = () => {
 
-    const [data, setData] = useState([
+    // [
+    //     {task: "Уборка", increase: true, done: true, id: 1},
+    //     {task: "Сходить в магазин", increase: false, done: false, id: 2},
+    //     {task: "Помыть посуду",increase: false, done: true, id: 3},
+    //     {task: "Учеба",increase: true, done: false, id: 4}
+    // ]
+
+    const [data, setData] = useState(JSON.parse(localStorage.getItem("data")) ? JSON.parse(localStorage.getItem("data")) :     [
         {task: "Уборка", increase: true, done: true, id: 1},
         {task: "Сходить в магазин", increase: false, done: false, id: 2},
         {task: "Помыть посуду",increase: false, done: true, id: 3},
@@ -21,7 +28,17 @@ const App = () => {
     const [onlyLiked, setOnlyLiked] = useState(false);
     const [doneTasks, setDoneTasks] = useState(false);
 
-    let minId = 5;
+    
+
+    useEffect(() => {
+        localStorage.setItem("data", JSON.stringify(data))
+    }, [data])
+
+    useEffect(() => {
+        if (!localStorage.getItem("minId")) {
+            localStorage.setItem("minId", 5)
+        }
+    }, [])
 
     const deleteItem = (id) => {
         setData((data) => {
@@ -35,12 +52,12 @@ const App = () => {
             setData((data) => {
                 
                 return [...data, 
-                    {task: task, increase: false, done: false, id: minId}
+                    {task: task, increase: false, done: false, id: localStorage.getItem("minId")}
                 ];
 
             })
-
-            minId++;
+            let newMinId = Number(localStorage.getItem("minId")) + 1
+            localStorage.setItem("minId", newMinId);
         }
     }
 
@@ -101,7 +118,7 @@ const App = () => {
         }
 
         if (btnSecond) {
-            return items.filter(i => {return i.increase === true});
+            return items.filter(i => {return (i.increase === true && i.done === false)});
         } 
 
         if (btnThird) {
